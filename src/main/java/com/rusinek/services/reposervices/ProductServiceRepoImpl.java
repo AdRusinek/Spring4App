@@ -1,5 +1,7 @@
 package com.rusinek.services.reposervices;
 
+import com.rusinek.commands.ProductForm;
+import com.rusinek.converters.ProductFormToProduct;
 import com.rusinek.domain.Product;
 import com.rusinek.repositories.ProductRepository;
 import com.rusinek.services.ProductService;
@@ -11,26 +13,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Profile("springdatajpa")
+@Profile({"springdatajpa"})
 public class ProductServiceRepoImpl implements ProductService {
 
     private ProductRepository productRepository;
+    private ProductFormToProduct productFormToProduct;
 
     @Autowired
     public void setProductRepository(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
+    @Autowired
+    public void setProductFormToProduct(ProductFormToProduct productFormToProduct) {
+        this.productFormToProduct = productFormToProduct;
+    }
     @Override
-    public List<Product> listAll() {
+    public List<?> listAll() {
         List<Product> products = new ArrayList<>();
-        productRepository.findAll().forEach(products::add);
+        productRepository.findAll().forEach(products::add); //fun with Java 8
         return products;
     }
 
     @Override
     public Product getById(Integer id) {
         return productRepository.findOne(id);
+    }
+
+    @Override
+    public Product saveOrUpdateProductForm(ProductForm productForm) {
+        return saveOrUpdate(productFormToProduct.convert(productForm));
     }
 
     @Override

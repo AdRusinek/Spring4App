@@ -1,8 +1,11 @@
 package com.rusinek.services.jpaservices;
 
 
+import com.rusinek.commands.ProductForm;
+import com.rusinek.converters.ProductFormToProduct;
 import com.rusinek.domain.Product;
 import com.rusinek.services.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +15,13 @@ import java.util.List;
 @Service
 @Profile("jpadao")
 public class ProductServiceJpaDaoImpl extends AbstractJpaDaoService implements ProductService {
+
+    private ProductFormToProduct productFormToProduct;
+
+    @Autowired
+    public void setProductFormToProduct(ProductFormToProduct productFormToProduct) {
+        this.productFormToProduct = productFormToProduct;
+    }
 
     @Override
     public List<Product> listAll() {
@@ -36,6 +46,11 @@ public class ProductServiceJpaDaoImpl extends AbstractJpaDaoService implements P
         em.getTransaction().commit();
 
         return savedProduct;
+    }
+
+    @Override
+    public Product saveOrUpdateProductForm(ProductForm productForm) {
+        return saveOrUpdate(productFormToProduct.convert(productForm));
     }
 
     @Override
