@@ -1,21 +1,28 @@
-package com.rusinek.services.mapservices;
+package com.rusinek.services.reposervices;
 
 import com.rusinek.commands.CustomerForm;
 import com.rusinek.converters.CustomerFormToCustomer;
 import com.rusinek.domain.Customer;
-import com.rusinek.domain.DomainObject;
+import com.rusinek.repositories.CustomerRepository;
 import com.rusinek.services.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Profile("map")
-public class CustomerServiceImpl extends AbstractMapService implements CustomerService {
+@Profile("springdatajpa")
+public class CustomerServiceRepoImpl implements CustomerService {
 
+    private CustomerRepository customerRepository;
     private CustomerFormToCustomer customerFormToCustomer;
+
+    @Autowired
+    public void setCustomerRepository(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
 
     @Autowired
     public void setCustomerFormToCustomer(CustomerFormToCustomer customerFormToCustomer) {
@@ -23,23 +30,20 @@ public class CustomerServiceImpl extends AbstractMapService implements CustomerS
     }
 
     @Override
-    public List<DomainObject> listAll() {
-        return super.listAll();
+    public List<?> listAll() {
+        List<Customer> customers = new ArrayList<>();
+        customerRepository.findAll().forEach(customers::add); //fun with Java 8
+        return customers;
     }
 
     @Override
     public Customer getById(Integer id) {
-        return (Customer) super.getById(id);
+        return customerRepository.findOne(id);
     }
 
     @Override
     public Customer saveOrUpdate(Customer domainObject) {
-        return (Customer) super.saveOrUpdate(domainObject);
-    }
-
-    @Override
-    public void delete(Integer id) {
-        super.delete(id);
+        return customerRepository.save(domainObject);
     }
 
     @Override
@@ -53,5 +57,10 @@ public class CustomerServiceImpl extends AbstractMapService implements CustomerS
         }
 
         return saveOrUpdate(newCustomer);
+    }
+
+    @Override
+    public void delete(Integer id) {
+        customerRepository.delete(id);
     }
 }
